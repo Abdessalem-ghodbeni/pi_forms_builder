@@ -177,3 +177,35 @@ export const retrieveAllForms = async (req, res) => {
     });
   }
 };
+
+export const getFormulaireById = async (req, res) => {
+  try {
+    const id = req.params.idForm;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        succes: false,
+        message: "Invalid id",
+      });
+    }
+
+    const formulaire = await FormsModel.findById(id).populate("formFields");
+    if (!formulaire) {
+      return res.status(404).json({
+        succes: false,
+        message: `introuvable formulaire avec l'id ${id}`,
+      });
+    }
+    res.status(200).json({
+      succes: true,
+      message: "formulaire recupéré avec succes",
+      formulaire,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      succes: false,
+      message: "somthing was warrning",
+      error: error.message,
+    });
+  }
+};
