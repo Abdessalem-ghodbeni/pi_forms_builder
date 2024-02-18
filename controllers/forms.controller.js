@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 import nodemailer from "nodemailer";
+import FormAnswer from "../models/Reponse.model.js";
 
 export const AddForms = async (req, res) => {
   try {
@@ -141,8 +142,8 @@ export const DeleteForm = async (req, res) => {
     }
 
     await FormField.deleteMany({ form: formId });
+    await FormAnswer.deleteMany({ form: formId });
     await FormsModel.findByIdAndDelete(formId);
-
     res.status(200).send({
       succes: true,
       message: "Le formulaire et ses champs ont été supprimés avec succès",
