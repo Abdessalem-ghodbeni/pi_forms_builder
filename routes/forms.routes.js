@@ -4,6 +4,7 @@ import {
   DeleteForm,
   getFormulaireById,
   retrieveAllForms,
+  shareFormWithMembers,
   updateFormWithFields,
 } from "../controllers/forms.controller.js";
 
@@ -15,5 +16,6 @@ router.put("/update/:id", updateFormWithFields);
 router.delete("/delete/:id", DeleteForm);
 router.get("/get/all", retrieveAllForms);
 router.get("/get/:idForm", getFormulaireById);
+router.post("/send", shareFormWithMembers);
 
 export default router;

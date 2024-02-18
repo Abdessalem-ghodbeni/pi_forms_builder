@@ -10,7 +10,10 @@ const formsSchema = mongoose.Schema(
       type: String,
       required: [true, "description est obligatoire"],
     },
-
+    link: {
+      type: String,
+      unique: true,
+    },
     style: {
       backgroundColor: {
         type: String,
@@ -36,12 +39,23 @@ const formsSchema = mongoose.Schema(
         ref: "FormFildes",
       },
     ],
+    responses: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Response",
+      },
+    ],
   },
 
   {
     timestamps: true,
   }
 );
+formsSchema.methods.addResponse = function (responseId) {
+  if (!this.responses.includes(responseId)) {
+    this.responses.push(responseId);
+  }
+};
 
 const FormsModel = mongoose.model("Forms", formsSchema);
 export default FormsModel;

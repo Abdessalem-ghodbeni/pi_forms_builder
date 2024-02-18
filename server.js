@@ -6,6 +6,7 @@ import cors from "cors";
 import connectDb from "./config/db.js";
 import multer from "multer";
 import formsRouter from "./routes/forms.routes.js";
+import responseForms from "./routes/response.routes.js";
 //initialisation d'expreess app
 const application = exrpress();
 //configuration dotenv
@@ -22,6 +23,7 @@ const Port = process.env.PORT || 5080;
 connectDb();
 
 application.use("/forms", formsRouter);
+application.use("/response", responseForms);
 
 application.listen(Port, () => {
   console.log(

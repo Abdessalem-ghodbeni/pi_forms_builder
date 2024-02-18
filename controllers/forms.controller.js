@@ -2,6 +2,8 @@ import FormField from "../models/formField.model.js";
 import FormsModel from "../models/forms.model.js";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
+import nodemailer from "nodemailer";
 
 export const AddForms = async (req, res) => {
   try {
@@ -13,8 +15,10 @@ export const AddForms = async (req, res) => {
         message: "merci de verifier vos champs",
       });
     }
+    const uniqueId = uuidv4();
+    //`${req.protocol}://${req.get('host')}/formulaire/${uniqueId}` a changer apres de deploiement
+    const formulaireLink = `http://localhost:${process.env.PORT}/formulaire/${uniqueId}`;
 
-    // Creation du formulaire
     const form = await FormsModel.create({
       title,
       description,
@@ -24,9 +28,9 @@ export const AddForms = async (req, res) => {
         fontFamily: style.fontFamily || "Arial",
         fontSize: style.fontSize || 14,
       },
+      link: formulaireLink,
     });
 
-    // Creation des champs de formulaire associés
     const createdFields = await FormField.create(
       formFields.map((field) => ({ ...field, form: form._id }))
     );
@@ -209,3 +213,128 @@ export const getFormulaireById = async (req, res) => {
     });
   }
 };
+
+// const sendShareEmail = async (email, formulaireLink) => {
+//   const transporter = nodemailer.createTransport({
+//     host: "smtp.gmail.com",
+//     port: 465,
+//     secure: true,
+//     auth: {
+//       user: "slouma4ghodbeny@gmail.com",
+//       pass: "slouma12702745",
+//     },
+//   });
+
+//   const mailOptions = {
+//     from: "Abdessalem <slouma4ghodbeny@gmail.com>",
+//     to: email,
+//     subject: "Partage de formulaire",
+//     text: `Voici le lien pour accéder au formulaire : ${formulaireLink}`,
+//   };
+//   transporter.sendMail(mailOptions, (error, info) => {
+//     if (error) {
+//       console.log(error);
+//     } else {
+//       console.log("E-mail envoyé : " + info.response);
+//     }
+//   });
+
+//   const info = await transporter.sendMail({
+//     from: "Abdessalem <slouma4ghodbeny@gmail.com>",
+//     to: "abdessalem.ghodbani@esprit.tn",
+//     subject: "testing testing",
+//     html: `
+//     //     <div>
+//     //     <h1>participation  </h1>
+//     //       <h2>Bonjour </h2>
+//     //       <p>Veuillez patciper votre email au formulaire en cliquant sur le lien suivant
+//     // </p>
+//     //       <a href=${formulaireLink}>Cliquez ici
+//     // </a>
+
+//     //       </div>`,
+//   });
+// };
+
+// export const shareFormWithMembers = async (req, res) => {
+//   try {
+//     const { members, formulaireLink } = req.body;
+
+//     members.forEach((member) => {
+//       sendShareEmail(member.email, formulaireLink);
+//     });
+
+//     res.status(200).send({
+//       success: true,
+//       message: "Lien de formulaire partagé avec succès",
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       message: "Erreur lors du partage du lien de formulaire",
+//     });
+//   }
+// };
+
+///********************************** */
+
+export const shareFormWithMembers = async (email, formulaireLink) => {
+  const user = "saadliwissem88@gmail.com";
+  const pass = "nynw jmuj tspl lcge";
+  const transport = nodemailer.createTransport({
+    service: "Gmail",
+    auth: {
+      user: user,
+      pass: pass,
+    },
+  });
+
+  await transport
+    .sendMail({
+      from: user,
+      to: email,
+      subject: "Veuillez activer votre compte ",
+      html: `
+    <div>
+    <h1>Activation du compte </h1>
+      <h2>Bonjour </h2>
+      <p>Veuillez patciper votre email au formulaire en cliquant sur le lien suivant
+</p>
+      <a href=${formulaireLink}>Cliquez ici
+</a>
+
+      </div>`,
+    })
+    .catch((err) => console.log(err));
+};
+///////************************************************///////// */
+
+// export const shareFormWithMembers = async (email, formulaireLink) => {
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     host: "smtp.gmail.com",
+//     secureConnection: false,
+//     port: 587,
+//     tls: {
+//       ciphers: "SSLv3",
+//     },
+//     auth: {
+//       user: process.env.USER,
+//       pass: process.env.PASS,
+//     },
+//   });
+//   const mailOptions = {
+//     from: "slouma4ghodbeny@gmail.com",
+//     to: email,
+//     text: formulaireLink,
+//   };
+
+//   await transporter.sendMail(mailOptions, (error, info) => {
+//     if (error) {
+//       console.log(error);
+//     } else {
+//       console.log("email envoyé");
+//     }
+//   });
+// };
