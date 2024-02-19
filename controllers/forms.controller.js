@@ -177,7 +177,7 @@ export const retrieveAllForms = async (req, res) => {
     console.log(error);
     res.status(500).send({
       succes: false,
-      message: "erreur lors de recuperation des formulaire ",
+      message: "erreur lors de recuperation des formulaire",
       error: error,
     });
   }
@@ -215,127 +215,55 @@ export const getFormulaireById = async (req, res) => {
   }
 };
 
-// const sendShareEmail = async (email, formulaireLink) => {
-//   const transporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",
-//     port: 465,
-//     secure: true,
-//     auth: {
-//       user: "slouma4ghodbeny@gmail.com",
-//       pass: "slouma12702745",
-//     },
-//   });
-
-//   const mailOptions = {
-//     from: "Abdessalem <slouma4ghodbeny@gmail.com>",
-//     to: email,
-//     subject: "Partage de formulaire",
-//     text: `Voici le lien pour accéder au formulaire : ${formulaireLink}`,
-//   };
-//   transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       console.log(error);
-//     } else {
-//       console.log("E-mail envoyé : " + info.response);
-//     }
-//   });
-
-//   const info = await transporter.sendMail({
-//     from: "Abdessalem <slouma4ghodbeny@gmail.com>",
-//     to: "abdessalem.ghodbani@esprit.tn",
-//     subject: "testing testing",
-//     html: `
-//     //     <div>
-//     //     <h1>participation  </h1>
-//     //       <h2>Bonjour </h2>
-//     //       <p>Veuillez patciper votre email au formulaire en cliquant sur le lien suivant
-//     // </p>
-//     //       <a href=${formulaireLink}>Cliquez ici
-//     // </a>
-
-//     //       </div>`,
-//   });
-// };
-
-// export const shareFormWithMembers = async (req, res) => {
-//   try {
-//     const { members, formulaireLink } = req.body;
-
-//     members.forEach((member) => {
-//       sendShareEmail(member.email, formulaireLink);
-//     });
-
-//     res.status(200).send({
-//       success: true,
-//       message: "Lien de formulaire partagé avec succès",
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       success: false,
-//       message: "Erreur lors du partage du lien de formulaire",
-//     });
-//   }
-// };
-
-///********************************** */
-
-export const shareFormWithMembers = async (email, formulaireLink) => {
-  const user = "saadliwissem88@gmail.com";
-  const pass = "nynw jmuj tspl lcge";
-  const transport = nodemailer.createTransport({
-    service: "Gmail",
+const sendShareEmail = async (email, formulaireLink) => {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
-      user: user,
-      pass: pass,
+      user: "slouma4ghodbeny@gmail.com",
+      pass: "hpsm wukl ihhg tohk",
     },
   });
 
-  await transport
-    .sendMail({
-      from: user,
-      to: email,
-      subject: "Veuillez activer votre compte ",
-      html: `
-    <div>
-    <h1>Activation du compte </h1>
-      <h2>Bonjour </h2>
-      <p>Veuillez patciper votre email au formulaire en cliquant sur le lien suivant
-</p>
-      <a href=${formulaireLink}>Cliquez ici
-</a>
+  const mailOptions = {
+    from: {
+      name: "Abdessalem",
+      adress: process.env.USER,
+    },
+    to: email,
+    subject: "Invitation de participation au projet ",
+    text: "Hello world?",
+    html: `<b>Hello world? ${formulaireLink} </b>`,
+  };
 
-      </div>`,
-    })
-    .catch((err) => console.log(err));
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("E-mail envoyé : " + info.response);
+    }
+  });
 };
-///////************************************************///////// */
 
-// export const shareFormWithMembers = async (email, formulaireLink) => {
-//   const transporter = nodemailer.createTransport({
-//     service: "gmail",
-//     host: "smtp.gmail.com",
-//     secureConnection: false,
-//     port: 587,
-//     tls: {
-//       ciphers: "SSLv3",
-//     },
-//     auth: {
-//       user: process.env.USER,
-//       pass: process.env.PASS,
-//     },
-//   });
-//   const mailOptions = {
-//     from: "slouma4ghodbeny@gmail.com",
-//     to: email,
-//     text: formulaireLink,
-//   };
+export const shareFormWithMembers = async (req, res) => {
+  try {
+    const { members, formulaireLink } = req.body;
 
-//   await transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       console.log(error);
-//     } else {
-//       console.log("email envoyé");
-//     }
-//   });
-// };
+    members.forEach((member) => {
+      sendShareEmail(member.email, formulaireLink);
+    });
+
+    res.status(200).send({
+      success: true,
+      message: "Lien de formulaire partagé avec succès",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Erreur lors du partage du lien de formulaire",
+    });
+  }
+};
