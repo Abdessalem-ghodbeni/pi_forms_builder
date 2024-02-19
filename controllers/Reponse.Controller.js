@@ -70,6 +70,22 @@ import path from "path";
 //   }
 // };
 
+const storage = (multer.diskStorage = {
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../images"));
+  },
+  filename: function (req, file, cb) {
+    // cb(null,file.originalname) originale name tetssajel bil esm ili uploada bih user wa9tili ena 7achti beha b date t3 lyoum...bech na3ref images enhii bi4abt
+    //.replace(/:/g, "-") kn jit t5dem bil mac mch lezma he4i 5ater y9belha SE par contre m3a windows la
+    cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
+  },
+});
+const upload = multer({
+  storage: storage,
+});
+
+//recuperer limage
+
 export const addResponse = async (req, res) => {
   try {
     const dataResponse = req.body;
@@ -78,6 +94,17 @@ export const addResponse = async (req, res) => {
         succes: false,
         message: "merci de remplir les champs",
       });
+    }
+
+    if (req.files && req.files.length > 0) {
+      // Récupérer les informations sur les fichiers téléchargés
+      const files = req.files.map((file) => {
+        return {
+          filename: file.filename,
+          path: file.path,
+        };
+      });
+      dataResponse.files = files;
     }
 
     const response = await ResponseModel.create(dataResponse);

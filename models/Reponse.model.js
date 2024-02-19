@@ -26,14 +26,16 @@ const responseSchema = mongoose.Schema(
       },
     ],
 
-    file: {
-      filename: {
-        type: String,
+    files: [
+      {
+        filename: {
+          type: String,
+        },
+        path: {
+          type: String,
+        },
       },
-      path: {
-        type: String,
-      },
-    },
+    ],
   },
   {
     timestamps: true,
