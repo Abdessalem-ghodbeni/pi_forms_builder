@@ -230,12 +230,52 @@ const sendShareEmail = async (email, formulaireLink) => {
   const mailOptions = {
     from: {
       name: "Abdessalem",
-      adress: process.env.USER,
+      adress: "slouma4ghodbeny@gmail.com",
     },
     to: email,
-    subject: "Invitation de participation au projet ",
-    text: "Hello world?",
-    html: `<b>Hello world? ${formulaireLink} </b>`,
+    subject: "Invitation à participer à un projet passionnant !",
+    text: "Invitation à participer à un projet passionnant !",
+    html: `<!DOCTYPE html>
+    <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        @media only screen and (max-width: 600px) {
+          .container {
+            width: 100% !important;
+          }
+          .button {
+            width: 100% !important;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <table class="container" style="max-width: 550px; width: 100%; margin: 0 auto;">
+        <tr>
+          <td style="background-color: #f0f0f0; padding: 20px;">
+            <table style="background-color: #ffffff; padding: 20px; border-radius: 10px; width: 100%;">
+              <tr>
+                <td>
+                  <h1 style="color: #333333; font-family: Arial, sans-serif; text-align: center;">Invitation à participer à un projet passionnant !</h1>
+                  <strong style="color: #555555; font-family: Arial, sans-serif;">Cher membre de MedicolGes,</strong>
+                  <p style="color: #555555; font-family: Arial, sans-serif;">Nous sommes ravis de vous inviter à participer à un projet des plus captivants. Votre contribution et vos idées sont d'une grande importance pour nous.</p>
+                  <p style="color: #555555; font-family: Arial, sans-serif;">Pour participer, veuillez cliquer sur le bouton ci-dessous :</p>
+                  <div style="text-align: center; margin-top: 20px;">
+                    <a href=${formulaireLink} class="button" style="background-color: #007bff; color: #ffffff; display: inline-block; padding: 8px 17px; text-decoration: none; border-radius: 5px; font-family: Arial, sans-serif;">Accéder au formulaire</a>
+                  </div>
+                  <p style="color: #555555; font-family: Arial, sans-serif;">Ce formulaire nous permettra de mieux comprendre vos besoins et d'adapter notre projet en conséquence.</p>
+                  <p style="color: #555555; font-family: Arial, sans-serif;">Nous apprécions votre participation et nous sommes impatients de collaborer avec vous pour réussir ce projet ensemble.</p>
+                  <p style="color: #555555; font-family: Arial, sans-serif;">Cordialement,</p>
+                  <p style="color: #555555; font-family: Arial, sans-serif;"> Ghodbani Abdessalem - Responsable Principale MedicolGes </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>`,
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
