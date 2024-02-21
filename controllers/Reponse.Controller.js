@@ -174,3 +174,38 @@ export const updateResponse = async (req, res) => {
     });
   }
 };
+//cloudinary Config
+cloudinary.v2.config({
+  cloud_name: "dqyyvvwap",
+  api_key: "829332458549452",
+  api_secret: "F4akaK4kP3eSh4cSjM-36tSbF60",
+});
+import cloudinary from "cloudinary";
+import { getDataUri } from "./../utils/features.js";
+import cloudinaryModel from "../models/testcloudinary.model.js";
+export const cloudinaryTest = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const file = getDataUri(req.file);
+    const cdb = await cloudinary.v2.uploader.upload(file.content);
+    const image = {
+      public_id: cdb.public_id,
+      url: cdb.secure_url,
+    };
+    await cloudinaryModel.create({
+      images: [image],
+      name,
+    });
+
+    res.status(201).send({
+      success: true,
+      message: "cloudinary Created Successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      succes: false,
+      message: "somthing was warrning",
+    });
+  }
+};

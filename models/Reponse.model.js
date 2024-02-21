@@ -25,17 +25,6 @@ const responseSchema = mongoose.Schema(
         },
       },
     ],
-
-    files: [
-      {
-        filename: {
-          type: String,
-        },
-        path: {
-          type: String,
-        },
-      },
-    ],
   },
   {
     timestamps: true,
