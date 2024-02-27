@@ -3,6 +3,7 @@ import Forms from "../models/forms.model.js";
 import { ObjectId } from "mongodb";
 import multer from "multer";
 import path from "path";
+import FormField from "../models/formField.model.js";
 // Configuration  multer pour l emplacement de stockage des fichiers /images....files
 // const storage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -86,48 +87,37 @@ const upload = multer({
 
 //recuperer limage
 
-export const addResponse = async (req, res) => {
-  try {
-    const dataResponse = req.body;
-    if (!dataResponse) {
-      return res.status(400).send({
-        succes: false,
-        message: "merci de remplir les champs",
-      });
-    }
+// export const addResponse = async (req, res) => {
+//   try {
+//     const dataResponse = req.body;
+//     if (!dataResponse) {
+//       return res.status(400).send({
+//         succes: false,
+//         message: "merci de remplir les champs",
+//       });
+//     }
 
-    if (req.files && req.files.length > 0) {
-      // Récupérer les informations sur les fichiers téléchargés
-      const files = req.files.map((file) => {
-        return {
-          filename: file.filename,
-          path: file.path,
-        };
-      });
-      dataResponse.files = files;
-    }
-
-    const response = await ResponseModel.create(dataResponse);
-    const formId = dataResponse.form;
-    const form = await Forms.findById(formId);
-    if (form) {
-      form.addResponse(response._id);
-      await form.save();
-    }
-    res.status(201).send({
-      succes: true,
-      message: "response added successfully",
-      response,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      succes: false,
-      message: "An error occurred",
-      error,
-    });
-  }
-};
+//     const response = await ResponseModel.create(dataResponse);
+//     const formId = dataResponse.form;
+//     const form = await Forms.findById(formId);
+//     if (form) {
+//       form.addResponse(response._id);
+//       await form.save();
+//     }
+//     res.status(201).send({
+//       succes: true,
+//       message: "response added successfully",
+//       response,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       succes: false,
+//       message: "An error occurred",
+//       error,
+//     });
+//   }
+// };
 
 export const updateResponse = async (req, res) => {
   try {
@@ -185,7 +175,7 @@ import { getDataUri } from "./../utils/features.js";
 import cloudinaryModel from "../models/testcloudinary.model.js";
 export const cloudinaryTest = async (req, res) => {
   try {
-    const { name } = req.body;
+    // const { name } = req.body;
     const file = getDataUri(req.file);
     const cdb = await cloudinary.v2.uploader.upload(file.content);
     const image = {
@@ -194,18 +184,83 @@ export const cloudinaryTest = async (req, res) => {
     };
     await cloudinaryModel.create({
       images: [image],
-      name,
+      // name,
     });
 
     res.status(201).send({
       success: true,
       message: "cloudinary Created Successfully",
+      url: cdb.secure_url,
     });
   } catch (error) {
     console.log(error);
     res.status(500).send({
       succes: false,
       message: "somthing was warrning",
+    });
+  }
+};
+
+export const addResponse = async (req, res) => {
+  try {
+    const dataResponse = req.body;
+    console.log(dataResponse);
+    if (!dataResponse) {
+      return res.status(400).send({
+        success: false,
+        message: "Merci de remplir les champs",
+      });
+    }
+
+    // Vérifier si la requête contient des images
+    if (req.files && req.files.length > 0) {
+      // Parcourir chaque fichier/image téléchargé
+      for (const file of req.files) {
+        const imageDataUri = getDataUri(file);
+
+        // Télécharger l'image sur Cloudinary
+        const uploadedImage = await cloudinary.v2.uploader.upload(
+          imageDataUri.content
+        );
+
+        // Récupérer l'URL de l'image sur Cloudinary
+        const imageUrl = uploadedImage.secure_url;
+
+        // Récupérer l'ID du champ d'image à partir de la requête
+        const imageFieldId = req.body[file.fieldname];
+
+        // Rechercher le champ correspondant dans la base de données
+        const imageField = await FormField.findById(imageFieldId);
+
+        if (imageField && imageField.type === "image") {
+          // Mettre à jour la valeur de l'image dans la réponse avec l'URL de l'image sur Cloudinary
+          const answerWithImage = {
+            field: imageField._id,
+            value: imageUrl,
+          };
+          dataResponse.answers.push(answerWithImage);
+        }
+      }
+    }
+
+    const response = await ResponseModel.create(dataResponse);
+    const formId = dataResponse.form;
+    const form = await Forms.findById(formId);
+    if (form) {
+      form.addResponse(response._id);
+      await form.save();
+    }
+    res.status(201).send({
+      success: true,
+      message: "Response added successfully",
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "An error occurred",
+      error,
     });
   }
 };
