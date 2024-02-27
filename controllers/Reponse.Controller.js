@@ -201,6 +201,69 @@ export const cloudinaryTest = async (req, res) => {
   }
 };
 
+// export const addResponse = async (req, res) => {
+//   try {
+//     const dataResponse = req.body;
+//     console.log(dataResponse);
+//     if (!dataResponse) {
+//       return res.status(400).send({
+//         success: false,
+//         message: "Merci de remplir les champs",
+//       });
+//     }
+
+//     // Vérifier si la requête contient des images
+//     if (req.files && req.files.length > 0) {
+//       // Parcourir chaque fichier/image téléchargé
+//       for (const file of req.files) {
+//         const imageDataUri = getDataUri(file);
+
+//         // Télécharger l'image sur Cloudinary
+//         const uploadedImage = await cloudinary.v2.uploader.upload(
+//           imageDataUri.content
+//         );
+
+//         // Récupérer l'URL de l'image sur Cloudinary
+//         const imageUrl = uploadedImage.secure_url;
+
+//         // Récupérer l'ID du champ d'image à partir de la requête
+//         const imageFieldId = req.body[file.fieldname];
+
+//         // Rechercher le champ correspondant dans la base de données
+//         const imageField = await FormField.findById(imageFieldId);
+
+//         if (imageField && imageField.type === "image") {
+//           // Mettre à jour la valeur de l'image dans la réponse avec l'URL de l'image sur Cloudinary
+//           const answerWithImage = {
+//             field: imageField._id,
+//             value: imageUrl,
+//           };
+//           dataResponse.answers.push(answerWithImage);
+//         }
+//       }
+//     }
+
+//     const response = await ResponseModel.create(dataResponse);
+//     const formId = dataResponse.form;
+//     const form = await Forms.findById(formId);
+//     if (form) {
+//       form.addResponse(response._id);
+//       await form.save();
+//     }
+//     res.status(201).send({
+//       success: true,
+//       message: "Response added successfully",
+//       response,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       message: "An error occurred",
+//       error,
+//     });
+//   }
+// };
 export const addResponse = async (req, res) => {
   try {
     const dataResponse = req.body;
@@ -212,33 +275,48 @@ export const addResponse = async (req, res) => {
       });
     }
 
-    // Vérifier si la requête contient des images
+    // Vérifier si la requête contient des images ou des fichiers PDF
     if (req.files && req.files.length > 0) {
       // Parcourir chaque fichier/image téléchargé
       for (const file of req.files) {
-        const imageDataUri = getDataUri(file);
+        const fileDataUri = getDataUri(file);
 
-        // Télécharger l'image sur Cloudinary
-        const uploadedImage = await cloudinary.v2.uploader.upload(
-          imageDataUri.content
-        );
+        // Vérifier le type de fichier
+        const fileType = file.mimetype;
+        let uploadedFile;
 
-        // Récupérer l'URL de l'image sur Cloudinary
-        const imageUrl = uploadedImage.secure_url;
+        if (
+          fileType === "image/jpeg" ||
+          fileType === "image/png" ||
+          fileType === "image/gif" ||
+          fileType === "image/bmp"
+        ) {
+          // Si c'est une image, traitez-la comme avant
+          uploadedFile = await cloudinary.uploader.upload(fileDataUri.content);
+        } else if (fileType === "application/pdf") {
+          // Si c'est un fichier PDF, traitez-le différemment
+          uploadedFile = await cloudinary.uploader.upload(file.path, {
+            resource_type: "raw",
+            format: "pdf",
+          });
+        }
 
-        // Récupérer l'ID du champ d'image à partir de la requête
-        const imageFieldId = req.body[file.fieldname];
+        // Récupérer l'URL du fichier sur Cloudinary
+        const fileUrl = uploadedFile.secure_url;
+
+        // Récupérer l'ID du champ de fichier à partir de la requête
+        const fileFieldId = req.body[file.fieldname];
 
         // Rechercher le champ correspondant dans la base de données
-        const imageField = await FormField.findById(imageFieldId);
+        const fileField = await FormField.findById(fileFieldId);
 
-        if (imageField && imageField.type === "image") {
-          // Mettre à jour la valeur de l'image dans la réponse avec l'URL de l'image sur Cloudinary
-          const answerWithImage = {
-            field: imageField._id,
-            value: imageUrl,
+        if (fileField && fileField.type === "file") {
+          // Mettre à jour la valeur du fichier dans la réponse avec l'URL du fichier sur Cloudinary
+          const answerWithFile = {
+            field: fileField._id,
+            value: fileUrl,
           };
-          dataResponse.answers.push(answerWithImage);
+          dataResponse.answers.push(answerWithFile);
         }
       }
     }
