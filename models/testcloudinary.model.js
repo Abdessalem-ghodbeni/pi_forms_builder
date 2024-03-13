@@ -2,6 +2,10 @@ import mongoose from "mongoose";
 
 const testSchema = mongoose.Schema(
   {
+    response: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Response",
+    },
     // name: {
     //   type: "string",
     // },

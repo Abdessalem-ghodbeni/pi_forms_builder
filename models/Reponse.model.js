@@ -25,6 +25,12 @@ const responseSchema = mongoose.Schema(
         },
       },
     ],
+    tests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Test",
+      },
+    ],
   },
   {
     timestamps: true,
