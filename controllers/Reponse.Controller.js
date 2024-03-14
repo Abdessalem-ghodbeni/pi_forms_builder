@@ -587,26 +587,47 @@ export const updateResponsez = async (req, res) => {
 //     });
 //   }
 // };
+
 export const getAllResponse = async (req, res) => {
   try {
     const responseListe = await ResponseModel.find();
     if (responseListe.length === 0) {
       return res.status(200).json({
         succes: true,
-        message: "accun reponse pour le moment",
+        message: "Aucune réponse pour le moment",
         responseListe,
       });
     }
+
+    const responseWithTestDetails = [];
+
+    for (const response of responseListe) {
+      let tests = [];
+      if (response.tests.length > 0) {
+        tests = await cloudinaryModel.find({ _id: { $in: response.tests } });
+      }
+
+      responseWithTestDetails.push({
+        _id: response._id,
+        form: response.form,
+        answers: response.answers,
+        tests: tests,
+        createdAt: response.createdAt,
+        updatedAt: response.updatedAt,
+        __v: response.__v,
+      });
+    }
+
     res.status(200).json({
       succes: true,
-      message: "ceci la liste des reponses",
-      responseListe,
+      message: "Voici la liste des réponses",
+      responseListe: responseWithTestDetails,
     });
   } catch (error) {
     console.log(error);
     res.status(500).json({
       succes: false,
-      message: "somthing was warrning",
+      message: "Une erreur s'est produite",
       error: error,
     });
   }
@@ -661,6 +682,80 @@ export const deleteResponse = async (req, res) => {
       success: false,
       message: "Une erreur s'est produite",
       error,
+    });
+  }
+};
+export const getResponseByIdf = async (req, res) => {
+  try {
+    const idResponse = req.params.id;
+    if (!ObjectId.isValid(idResponse)) {
+      return res.status(500).send({
+        succes: false,
+        message: "id est non valid ",
+      });
+    }
+    const response = await ResponseModel.findById(idResponse);
+    if (!response) {
+      return res.status(404).send({
+        succes: false,
+        message: `response avec id = ${idResponse} est introuvable`,
+      });
+    }
+
+    res.status(200).send({
+      succes: true,
+      message: "response recuperé avec succes",
+      response,
+    });
+  } catch (error) {
+    res.status(500).json({
+      succes: false,
+      message: "somthing was warrning",
+      error: error,
+    });
+  }
+};
+
+export const getResponseById = async (req, res) => {
+  try {
+    const idResponse = req.params.id;
+    if (!ObjectId.isValid(idResponse)) {
+      return res.status(500).send({
+        succes: false,
+        message: "L'ID n'est pas valide",
+      });
+    }
+
+    const response = await ResponseModel.findById(idResponse);
+    if (!response) {
+      return res.status(404).send({
+        succes: false,
+        message: `La réponse avec l'ID ${idResponse} est introuvable`,
+      });
+    }
+
+    const tests = await cloudinaryModel.find({ _id: { $in: response.tests } });
+
+    const responseWithTestDetails = {
+      _id: response._id,
+      form: response.form,
+      answers: response.answers,
+      tests: tests,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      __v: response.__v,
+    };
+
+    res.status(200).send({
+      succes: true,
+      message: "Réponse récupérée avec succès",
+      response: responseWithTestDetails,
+    });
+  } catch (error) {
+    res.status(500).json({
+      succes: false,
+      message: "Une erreur s'est produite",
+      error: error,
     });
   }
 };
