@@ -685,36 +685,6 @@ export const deleteResponse = async (req, res) => {
     });
   }
 };
-export const getResponseByIdf = async (req, res) => {
-  try {
-    const idResponse = req.params.id;
-    if (!ObjectId.isValid(idResponse)) {
-      return res.status(500).send({
-        succes: false,
-        message: "id est non valid ",
-      });
-    }
-    const response = await ResponseModel.findById(idResponse);
-    if (!response) {
-      return res.status(404).send({
-        succes: false,
-        message: `response avec id = ${idResponse} est introuvable`,
-      });
-    }
-
-    res.status(200).send({
-      succes: true,
-      message: "response recuperé avec succes",
-      response,
-    });
-  } catch (error) {
-    res.status(500).json({
-      succes: false,
-      message: "somthing was warrning",
-      error: error,
-    });
-  }
-};
 
 export const getResponseById = async (req, res) => {
   try {
