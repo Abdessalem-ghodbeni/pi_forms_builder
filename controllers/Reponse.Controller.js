@@ -7,6 +7,9 @@ import FormField from "../models/formField.model.js";
 import cloudinary from "cloudinary";
 import { getDataUri } from "./../utils/features.js";
 import cloudinaryModel from "../models/testcloudinary.model.js";
+
+import cloudinaryUploader from "cloudinary";
+import { singleUpload } from "../middleware/multer.js";
 const storage = (multer.diskStorage = {
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "../images"));
@@ -99,70 +102,70 @@ export const cloudinaryTest = async (req, res) => {
   }
 };
 
-// export const addResponse = async (req, res) => {
-//   try {
-//     const dataResponse = req.body;
-//     console.log(dataResponse);
-//     if (!dataResponse) {
-//       return res.status(400).send({
-//         success: false,
-//         message: "Merci de remplir les champs",
-//       });
-//     }
-
-//     // Vérifier si la requête contient des images
-//     if (req.files && req.files.length > 0) {
-//       // Parcourir chaque fichier/image téléchargé
-//       for (const file of req.files) {
-//         const imageDataUri = getDataUri(file);
-
-//         // Télécharger l'image sur Cloudinary
-//         const uploadedImage = await cloudinary.v2.uploader.upload(
-//           imageDataUri.content
-//         );
-
-//         // Récupérer l'URL de l'image sur Cloudinary
-//         const imageUrl = uploadedImage.secure_url;
-
-//         // Récupérer l'ID du champ d'image à partir de la requête
-//         const imageFieldId = req.body[file.fieldname];
-
-//         // Rechercher le champ correspondant dans la base de données
-//         const imageField = await FormField.findById(imageFieldId);
-
-//         if (imageField && imageField.type === "image") {
-//           // Mettre à jour la valeur de l'image dans la réponse avec l'URL de l'image sur Cloudinary
-//           const answerWithImage = {
-//             field: imageField._id,
-//             value: imageUrl,
-//           };
-//           dataResponse.answers.push(answerWithImage);
-//         }
-//       }
-//     }
-
-//     const response = await ResponseModel.create(dataResponse);
-//     const formId = dataResponse.form;
-//     const form = await Forms.findById(formId);
-//     if (form) {
-//       form.addResponse(response._id);
-//       await form.save();
-//     }
-//     res.status(201).send({
-//       success: true,
-//       message: "Response added successfully",
-//       response,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({
-//       success: false,
-//       message: "An error occurred",
-//       error,
-//     });
-//   }
-// };
 export const addResponse = async (req, res) => {
+  try {
+    const dataResponse = req.body;
+    console.log(dataResponse);
+    if (!dataResponse) {
+      return res.status(400).send({
+        success: false,
+        message: "Merci de remplir les champs",
+      });
+    }
+
+    // Vérifier si la requête contient des images
+    if (req.files && req.files.length > 0) {
+      // Parcourir chaque fichier/image téléchargé
+      for (const file of req.files) {
+        const imageDataUri = getDataUri(file);
+
+        // Télécharger l'image sur Cloudinary
+        const uploadedImage = await cloudinary.v2.uploader.upload(
+          imageDataUri.content
+        );
+
+        // Récupérer l'URL de l'image sur Cloudinary
+        const imageUrl = uploadedImage.secure_url;
+
+        // Récupérer l'ID du champ d'image à partir de la requête
+        const imageFieldId = req.body[file.fieldname];
+
+        // Rechercher le champ correspondant dans la base de données
+        const imageField = await FormField.findById(imageFieldId);
+
+        if (imageField && imageField.type === "image") {
+          // Mettre à jour la valeur de l'image dans la réponse avec l'URL de l'image sur Cloudinary
+          const answerWithImage = {
+            field: imageField._id,
+            value: imageUrl,
+          };
+          dataResponse.answers.push(answerWithImage);
+        }
+      }
+    }
+
+    const response = await ResponseModel.create(dataResponse);
+    const formId = dataResponse.form;
+    const form = await Forms.findById(formId);
+    if (form) {
+      form.addResponse(response._id);
+      await form.save();
+    }
+    res.status(201).send({
+      success: true,
+      message: "Response added successfully",
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "An error occurred",
+      error,
+    });
+  }
+};
+export const addResponsee = async (req, res) => {
   try {
     const dataResponse = req.body;
     // console.log(dataResponse);
@@ -255,6 +258,7 @@ export const addResponse = async (req, res) => {
     });
   }
 };
+
 export const addResponsde = async (req, res) => {
   try {
     console.log(req.body);
